@@ -9,41 +9,25 @@ def obtem_direecao(ponto1, ponto2):
     return dir_x, dir_y
 
 
-def pacman_cima(estado_jogo):
-    t.up()
+def mover_pacman(estado_jogo, pos, angulo):
     arranjar_posicao_pacman(estado_jogo)
-    t.setheading(90)
+    t.setheading(angulo)
     t.up()
     t.fd(TAMANHO_CELULA)
     t.hideturtle()
-    estado_jogo['pacman']['direcao_atual'] = (0,5)
+    estado_jogo['pacman']['direcao_atual'] = pos
+
+def pacman_cima(estado_jogo):
+    mover_pacman(estado_jogo, (0,5), 90)
 
 def pacman_baixo(estado_jogo):
-    t.up()
-    arranjar_posicao_pacman(estado_jogo)
-    t.setheading(270)
-    t.up()
-    t.fd(TAMANHO_CELULA)
-    t.hideturtle()
-    estado_jogo['pacman']['direcao_atual'] = (0,-5)
+    mover_pacman(estado_jogo, (0,-5), 270)
 
 def pacman_direita(estado_jogo):
-    t.up()
-    arranjar_posicao_pacman(estado_jogo)
-    t.setheading(0)
-    t.up()
-    t.fd(TAMANHO_CELULA)
-    t.hideturtle()
-    estado_jogo['pacman']['direcao_atual'] = (5,0)
+    mover_pacman(estado_jogo, (5,0), 0)
 
 def pacman_esquerda(estado_jogo):
-    t.up()
-    arranjar_posicao_pacman(estado_jogo)
-    t.setheading(180)
-    t.up()
-    t.fd(TAMANHO_CELULA)
-    t.hideturtle()
-    estado_jogo['pacman']['direcao_atual'] = (-5,0)
+    mover_pacman(estado_jogo, (-5,0), 180)
     
 def movimenta_pinky(estado_jogo):
     pass
@@ -63,60 +47,18 @@ def movimenta_clyde(estado_jogo):
 
 
 def movimenta_inky(estado_jogo):
-
-
-
     direcao_escolhida = random.choice(DIRECOES_POSSIVEIS)
     while not movimento_valido((direcao_escolhida[0], direcao_escolhida[1]), estado_jogo):
         direcao_escolhida=random.choice(DIRECOES_POSSIVEIS)
         
-        
-
-
-
-    if direcao_escolhida==DIRECOES_POSSIVEIS[0]:
-
-        t.up()
-        t.hideturtle()
-        arranjar_posicao_inky(estado_jogo)
-        t.setheading(90)
-        t.up()
-        t.fd(TAMANHO_CELULA)
-        estado_jogo['fantasmas'][INKY_OBJECT]['direcao_atual'] = DIRECOES_POSSIVEIS[0]
-
-
-    elif direcao_escolhida==DIRECOES_POSSIVEIS[1]:
-        t.up()
-        t.hideturtle()
-        arranjar_posicao_inky(estado_jogo)
-        t.setheading(270)
-        t.up()
-        t.fd(TAMANHO_CELULA)
-        estado_jogo['fantasmas'][INKY_OBJECT]['direcao_atual'] = DIRECOES_POSSIVEIS[1]
-
-    elif direcao_escolhida==DIRECOES_POSSIVEIS[2]:
-        t.up()
-        t.hideturtle()
-        arranjar_posicao_inky(estado_jogo)
-        t.setheading(0)
-        t.up()
-        t.fd(TAMANHO_CELULA)
-        estado_jogo['fantasmas'][INKY_OBJECT]['direcao_atual'] = DIRECOES_POSSIVEIS[2]
-
-    else:
-        t.up()
-        t.hideturtle()
-        arranjar_posicao_inky(estado_jogo)
-        t.setheading(180)
-        t.up()
-        t.fd(TAMANHO_CELULA)
-        estado_jogo['fantasmas'][INKY_OBJECT]['direcao_atual'] = DIRECOES_POSSIVEIS[3]
-
-     
-
+    return direcao_escolhida
 
 def movimenta_blinky(estado_jogo):
-    pass
+    direcao_escolhida = random.choice(DIRECOES_POSSIVEIS)
+    while not movimento_valido((direcao_escolhida[0], direcao_escolhida[1]), estado_jogo):
+        direcao_escolhida=random.choice(DIRECOES_POSSIVEIS)
+        
+    return direcao_escolhida
 
 def perdeu_jogo(estado_jogo):
     pass
@@ -152,12 +94,20 @@ def actualiza_posicao_pacman_fantasma(estado_jogo):
 
 def guarda_jogo(estado_jogo):
     actualiza_posicao_pacman_fantasma(estado_jogo)
-    str_mapa = ''
-    pass
+    mapa = estado_jogo['mapa']
+
+    nome_ficheiro = 'save.txt'
+
+    with open(nome_ficheiro, 'w') as ficheiro: 
+        for i in range(0, len(mapa), MAP_WIDTH):
+            linha = ','.join(map(str, mapa[i:i+MAP_WIDTH]))  
+            ficheiro.write(linha + '\n')
 
 def carrega_jogo(estado_jogo, nome_ficheiro):
     estado_jogo['mapa'] = carrega_mapa(nome_ficheiro)
     
+
+
 
 
 

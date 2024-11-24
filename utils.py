@@ -11,7 +11,6 @@ def carrega_mapa(nome_ficheiro):
         
     return mapa_jogo
 
-
 def arranjar_posicao_pacman(estado_jogo):
     turtle.up()
     turtle.goto((estado_jogo['pacman']['objeto'].pos()))
