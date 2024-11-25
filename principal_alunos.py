@@ -29,18 +29,39 @@ def pacman_esquerda(estado_jogo):
     mover_pacman(estado_jogo, (-5,0), 180)
     
 def movimenta_pinky(estado_jogo):
-    pass
+    distancia_minima=100000
+    direcao_distancia_minima=None
+    pacman_pos = estado_jogo['pacman']['objeto'].pos()
+    for i in range(0,4):
+        testar_direcao_x= estado_jogo['fantasmas'][PINKY_OBJECT]['objeto'].xcor() + DIRECOES_POSSIVEIS[i][0]
+        testar_direcao_y= estado_jogo['fantasmas'][PINKY_OBJECT]['objeto'].ycor() + DIRECOES_POSSIVEIS[i][1]
+        if movimento_valido((testar_direcao_x,testar_direcao_y), estado_jogo):
+            distancia = calculate_distance((testar_direcao_x,testar_direcao_y),pacman_pos)
+            if distancia_minima>distancia:
+                distancia_minima=distancia
+                direcao_distancia_minima=(DIRECOES_POSSIVEIS[i])
+
+    return direcao_distancia_minima
 
 def calculate_distance(pos1, pos2):
     return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
 def movimenta_clyde(estado_jogo):
-    scatter_distance_threshold = 3
-    scatter_corner_index = 0
-    pacman_pos = estado_jogo['pacman']['objeto'].pos()
-    ghost_pos = estado_jogo['fantasmas'][CLYDE_OBJECT]['objeto'].pos()
+    pass
+#     scatter_distance_threshold = 3
+#     scatter_corner_index = 0
+#     pacman_pos = estado_jogo['pacman']['objeto'].pos()
+#     ghost_pos = estado_jogo['fantasmas'][CLYDE_OBJECT]['objeto'].pos()
+#     distancia = calculate_distance(pacman_pos, ghost_pos)
+#     while not movimento_valido((estado_jogo['fantasmas'][CLYDE_OBJECT]['objeto'].pos()), estado_jogo):
+#         if distancia > scatter_distance_threshold:
+#             obtem_direecao(estado_jogo['pacman']['objeto'].pos(), estado_jogo['fantasmas'][CLYDE_OBJECT]['objeto'].pos())
+#             estado_jogo['fantasmas'][CLYDE_OBJECT]['direcao_atual'] = obtem_direecao(estado_jogo['pacman']['objeto'].pos(), estado_jogo['fantasmas'][CLYDE_OBJECT]['objeto'].pos())
+
+#         #else:
+#             #break
     
-    return 
+#     return  obtem_direecao(estado_jogo['pacman']['objeto'].pos(), estado_jogo['fantasmas'][CLYDE_OBJECT]['objeto'].pos())
 
 def movimenta_inky(estado_jogo):
     direcao_escolhida = random.choice(DIRECOES_POSSIVEIS)
