@@ -19,53 +19,65 @@ def pacman_direita(estado_jogo):
 def pacman_esquerda(estado_jogo):
     estado_jogo['pacman']['direcao_atual'] = (-5,0)
 
-def perseguicao(posicao_x_fantasma, posicao_y_fantasma,ponto_posicao):
-    distancia_minima=100000
-    direcao_distancia_minima=None
-    for i in range(0,4):
-        testar_direcao_x= posicao_x_fantasma + DIRECOES_POSSIVEIS[i][0]
-        testar_direcao_y= posicao_y_fantasma + DIRECOES_POSSIVEIS[i][1]
-        if movimento_valido((testar_direcao_x,testar_direcao_y), estado_jogo):
-            distancia = calculate_distance((testar_direcao_x,testar_direcao_y),ponto_posicao)
-            if distancia_minima>distancia:
-                distancia_minima=distancia
-                direcao_distancia_minima=(DIRECOES_POSSIVEIS[i])
+def perseguicao(fantasma_posicao, ponto_posicao):
+    direcao = obtem_direcao(ponto_posicao, fantasma_posicao)
+    dir_x = direcao[0]
+    dir_y = direcao[1]
 
-    return direcao_distancia_minima
+    if abs(dir_x) > abs(dir_y):
+        if dir_x > 0:
+            proxima_direcao = (5,0)
+        else:
+            proxima_direcao = (-5,0)
+    else:
+        if dir_y > 0:
+            proxima_direcao = (0,5)
+        else:
+            proxima_direcao = (0,-5)
+
+    testar_direcao = fantasma_posicao + proxima_direcao
+    if movimento_valido(testar_direcao, estado_jogo):
+        return proxima_direcao
+    else:
+        # procurar a direcao mais proxima
+        distancia_minima = 100000
+        direcao_distancia_minima = None
+        for i in range(0,4):
+            testar_direcao_x= fantasma_posicao[0] + DIRECOES_POSSIVEIS[i][0]
+            testar_direcao_y= fantasma_posicao[1] + DIRECOES_POSSIVEIS[i][1]
+            if movimento_valido((testar_direcao_x,testar_direcao_y), estado_jogo):
+                distancia = calculate_distance((testar_direcao_x,testar_direcao_y),ponto_posicao)
+                if distancia_minima>distancia:
+                    distancia_minima=distancia
+                    direcao_distancia_minima=(DIRECOES_POSSIVEIS[i])
+
+        return direcao_distancia_minima
 
 def movimenta_pinky(estado_jogo):
     pacman_pos = estado_jogo['pacman']['objeto'].pos()
     pinky_pos = estado_jogo['fantasmas'][PINKY_OBJECT]['objeto'].pos()
-    pinky_x = estado_jogo['fantasmas'][PINKY_OBJECT]['objeto'].xcor()
-    pinky_y = estado_jogo['fantasmas'][PINKY_OBJECT]['objeto'].ycor()
-    perseguicao(pinky_x, pinky_y, pacman_pos)
-    return perseguicao(pinky_x, pinky_y, pacman_pos)
+    return perseguicao(pinky_pos, pacman_pos)
 
 def calculate_distance(pos1, pos2):
     return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
 def movimenta_clyde(estado_jogo):
     scatter_distance_threshold = 3*TAMANHO_CELULA
-    scatter_corner_index = calcula_x_y_from_index(0)
+    scatter_corner_pos = calcula_x_y_from_index(0)
     pacman_pos = estado_jogo['pacman']['objeto'].pos()
     clyde_pos = estado_jogo['fantasmas'][CLYDE_OBJECT]['objeto'].pos()
-    clyde_x = estado_jogo['fantasmas'][CLYDE_OBJECT]['objeto'].xcor()
-    clyde_y = estado_jogo['fantasmas'][CLYDE_OBJECT]['objeto'].ycor()
     distancia = calculate_distance(pacman_pos, clyde_pos)
 
     if distancia > scatter_distance_threshold:
-        return perseguicao(clyde_x, clyde_y, pacman_pos)
-        
+        return perseguicao(clyde_pos, pacman_pos)
     else:
-        return perseguicao(clyde_x, clyde_y, scatter_corner_index)
+        return perseguicao(clyde_pos, scatter_corner_pos)
     
 def movimenta_inky(estado_jogo):
-    direcao_escolhida = random.choice(DIRECOES_POSSIVEIS)   
-    return direcao_escolhida
+    return random.choice(DIRECOES_POSSIVEIS)   
 
 def movimenta_blinky(estado_jogo):
-    direcao_escolhida = random.choice(DIRECOES_POSSIVEIS)
-    return direcao_escolhida
+    return random.choice(DIRECOES_POSSIVEIS)
 
 def perdeu_jogo(estado_jogo):
     for i in range (3,7):
@@ -73,9 +85,9 @@ def perdeu_jogo(estado_jogo):
             terminar_jogo(estado_jogo)   
 
 def ganhou_jogo(estado_jogo):
-    mapa = estado_jogo['mapa']
-    if mapa.count(7) == 155:
+    if estado_jogo['score'] == 155:
         print ("Parabéns, ganhaste o jogo")
+        estado_jogo['janela'].bye()
     
 def atualiza_pontos(estado_jogo):
     x = estado_jogo['pacman']['objeto'].xcor() 
@@ -127,35 +139,38 @@ def carrega_jogo(estado_jogo, nome_ficheiro):
     pontos = mapa_jogo.count(7)
     estado_jogo['score'] = pontos
 
-
 if __name__ == '__main__':
-    #dicionario com as funcoes de movimento dos jogadores
-    funcoes_jogador = {'pacman_cima': pacman_cima, 'pacman_baixo': pacman_baixo, 'pacman_esquerda': pacman_esquerda, 'pacman_direita': pacman_direita, 'guarda_jogo' : guarda_jogo, 'carrega_jogo' : carrega_jogo}    
-    funcoes_fantasmas = {BLINKY_OBJECT : movimenta_blinky, PINKY_OBJECT : movimenta_pinky, INKY_OBJECT : movimenta_inky, CLYDE_OBJECT : movimenta_clyde}
+    try:
+        #dicionario com as funcoes de movimento dos jogadores
+        funcoes_jogador = {'pacman_cima': pacman_cima, 'pacman_baixo': pacman_baixo, 'pacman_esquerda': pacman_esquerda, 'pacman_direita': pacman_direita, 'guarda_jogo' : guarda_jogo, 'carrega_jogo' : carrega_jogo}    
+        funcoes_fantasmas = {BLINKY_OBJECT : movimenta_blinky, PINKY_OBJECT : movimenta_pinky, INKY_OBJECT : movimenta_inky, CLYDE_OBJECT : movimenta_clyde}
 
-    nome_ficheiro = input('Qual dos dois mapas pretende carregar (ENTER para carregar o mapa default), (s para carregar o mapa guardado): ')
-    if nome_ficheiro == '':
-        nome_ficheiro = 'mapa_inicial.txt'
-    else:
-        if nome_ficheiro == 's':
-            nome_ficheiro='save.txt'
-          
-    #funções de inicio do jogo
-    estado_jogo = init_state()
-    carrega_jogo(estado_jogo, nome_ficheiro)
-    setup(estado_jogo, True, funcoes_jogador,funcoes_fantasmas)
-    update_board(estado_jogo)
-    estado_jogo['marcador'].up()
-    
+        nome_ficheiro = input('Qual dos dois mapas pretende carregar: \n   - ENTER para carregar o mapa default \n   - s para carregar o mapa guardado\n')
+        if nome_ficheiro == '':
+            nome_ficheiro = 'mapa_inicial.txt'
+        else:
+            if nome_ficheiro == 's':
+                nome_ficheiro='save.txt'
+            
+        #funções de inicio do jogo
+        estado_jogo = init_state()
+        carrega_jogo(estado_jogo, nome_ficheiro)
+        setup(estado_jogo, True, funcoes_jogador,funcoes_fantasmas)
+        update_board(estado_jogo)
+        estado_jogo['marcador'].up()
+        
 
-    #inicia_jogo(estado_jogo)
-    while not perdeu_jogo(estado_jogo):
-        if estado_jogo['mapa'] is not None:
-            estado_jogo['janela'].update() #actualiza a janela
-            movimenta_objectos(estado_jogo)
-            atualiza_pontos(estado_jogo)
-            time.sleep(0.05)
-    #except TclError
+        #inicia_jogo(estado_jogo)
+        while not perdeu_jogo(estado_jogo):
+            if estado_jogo['mapa'] is not None:
+                estado_jogo['janela'].update() #actualiza a janela
+                movimenta_objectos(estado_jogo)
+                atualiza_pontos(estado_jogo)
+                time.sleep(0.05)
+            ganhou_jogo(estado_jogo)
+
+    except TclError:
+        pass
 
 
 
