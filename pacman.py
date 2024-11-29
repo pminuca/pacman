@@ -203,6 +203,7 @@ def terminar_jogo(estado_jogo):
     '''
     print("Adeus")
     estado_jogo['janela'].bye()
+    return True
     
 
 def cria_objectos(estado_jogo):
